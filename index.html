@@ -1968,482 +1968,497 @@
 
 <script>
 // ============================================
-// STRICT PROTECTION - DEVELOPER TOOLS DISABLED
+// EXTREME PROTECTION - MAKSIMAL BLOKIR
 // ============================================
 
-// 1. BLOCK ALL KEYBOARD SHORTCUTS
+// 1. OVERRIDE CONSOLE TOTALLY - HARUS DI AWAL
+(function() {
+    // Capture all console methods first
+    const consoleMethods = ['log', 'warn', 'error', 'info', 'debug', 'table', 'dir', 'time', 'timeEnd', 'trace', 'clear', 'group', 'groupEnd', 'assert', 'count', 'countReset', 'dirxml', 'profile', 'profileEnd', 'timeLog', 'timeStamp'];
+    
+    consoleMethods.forEach(method => {
+        if (console[method]) {
+            console[method] = function() {
+                // Silent block - tidak ada output
+                throw new Error(); // Buat error untuk freeze
+            };
+        }
+    });
+    
+    // Override console object itself
+    Object.defineProperty(window, 'console', {
+        value: {},
+        writable: false,
+        configurable: false
+    });
+})();
+
+// 2. BLOCK ALL POSSIBLE KEY COMBINATIONS
 document.addEventListener('keydown', function(e) {
-    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, etc.
-    const blockedCombos = [
-        e.keyCode === 123, // F12
-        e.ctrlKey && e.shiftKey && e.keyCode === 73, // Ctrl+Shift+I
-        e.ctrlKey && e.shiftKey && e.keyCode === 74, // Ctrl+Shift+J
-        e.ctrlKey && e.shiftKey && e.keyCode === 67, // Ctrl+Shift+C
-        e.ctrlKey && e.keyCode === 85, // Ctrl+U
-        e.ctrlKey && e.keyCode === 83, // Ctrl+S
-        e.ctrlKey && e.keyCode === 80, // Ctrl+P
-        e.altKey && e.keyCode === 115, // Alt+F4
-        e.shiftKey && e.keyCode === 121, // Shift+F10
-        e.keyCode === 116, // F5
-        e.ctrlKey && e.keyCode === 116, // Ctrl+F5
-        e.keyCode === 122 && e.ctrlKey, // Ctrl+F11
-    ];
-    
-    if (blockedCombos.some(combo => combo)) {
+    // Block semua function keys
+    if (e.keyCode >= 112 && e.keyCode <= 123) { // F1-F12
         e.preventDefault();
-        e.stopPropagation();
         e.stopImmediatePropagation();
-        showProtectionAlert();
+        // Force page reload untuk gangguan
+        setTimeout(() => {
+            document.body.innerHTML = '';
+            window.location.reload();
+        }, 50);
         return false;
     }
     
-    // Block any function keys (F1-F12)
-    if (e.keyCode >= 112 && e.keyCode <= 123) {
-        e.preventDefault();
-        return false;
+    // Block semua Ctrl combinations
+    if (e.ctrlKey || e.metaKey) {
+        // Izinkan hanya Ctrl+C, Ctrl+V, Ctrl+X untuk form (tapi tetap block di luar form)
+        const allowedInForm = ['C', 'V', 'X', 'A'];
+        const key = String.fromCharCode(e.keyCode).toUpperCase();
+        
+        if (!allowedInForm.includes(key) || !e.target.matches('input, textarea, [contenteditable="true"]')) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            // Random scroll untuk mengganggu
+            window.scrollTo({
+                top: Math.random() * document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+            
+            return false;
+        }
     }
     
-    // Block Ctrl combinations
-    if (e.ctrlKey) {
-        e.preventDefault();
-        return false;
-    }
-    
-    // Block Alt combinations
+    // Block semua Alt combinations
     if (e.altKey) {
         e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+    }
+    
+    // Block Shift+F10 (context menu key)
+    if (e.shiftKey && e.keyCode === 121) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+    }
+    
+    // Block Escape key untuk inspect element
+    if (e.keyCode === 27) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         return false;
     }
 }, true);
 
-// 2. BLOCK RIGHT CLICK COMPLETELY
+// 3. EXTREME RIGHT CLICK BLOCK
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
-    e.stopPropagation();
-    showProtectionAlert();
+    e.stopImmediatePropagation();
+    
+    // Tambahkan efek visual halus untuk feedback
+    const element = e.target;
+    const originalOutline = element.style.outline;
+    element.style.outline = '2px solid rgba(255, 0, 0, 0.3)';
+    
+    setTimeout(() => {
+        element.style.outline = originalOutline;
+    }, 300);
+    
     return false;
 }, true);
 
-// 3. BLOCK SELECTION AND COPY
-document.addEventListener('selectstart', function(e) {
-    e.preventDefault();
-    return false;
+// 4. BLOCK ALL MOUSE ACTIONS THAT COULD OPEN DEVTOOLS
+document.addEventListener('mousedown', function(e) {
+    // Block triple click
+    if (e.detail > 2) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        // Randomly move cursor
+        if (Math.random() > 0.5) {
+            e.target.style.transform = 'translate(5px, 5px)';
+            setTimeout(() => {
+                e.target.style.transform = '';
+            }, 200);
+        }
+        return false;
+    }
 }, true);
 
-document.addEventListener('copy', function(e) {
-    e.preventDefault();
-    return false;
-}, true);
+// 5. CONTINUOUS DEVTools DETECTION WITH AGGRESSIVE RESPONSE
+let protectionActive = false;
+let detectionCount = 0;
 
-document.addEventListener('cut', function(e) {
-    e.preventDefault();
-    return false;
-}, true);
-
-document.addEventListener('paste', function(e) {
-    e.preventDefault();
-    return false;
-}, true);
-
-// 4. BLOCK DRAG AND DROP
-document.addEventListener('dragstart', function(e) {
-    e.preventDefault();
-    return false;
-}, true);
-
-document.addEventListener('drop', function(e) {
-    e.preventDefault();
-    return false;
-}, true);
-
-// 5. ADVANCED DEVTools DETECTION
-let devToolsOpen = false;
-const detectionThreshold = 160;
-
-// Method 1: Dimension checking
-function detectDevToolsByDimensions() {
+function checkDevTools() {
+    // Multiple detection methods
+    
+    // Method 1: Check window dimensions
     const widthDiff = Math.abs(window.outerWidth - window.innerWidth);
     const heightDiff = Math.abs(window.outerHeight - window.innerHeight);
     
-    return (widthDiff > detectionThreshold || heightDiff > detectionThreshold);
-}
-
-// Method 2: Debugger detection
-function detectDevToolsByDebugger() {
-    const startTime = new Date().getTime();
+    // Method 2: Check if debugger is present
+    const start = Date.now();
     debugger;
-    const endTime = new Date().getTime();
-    return (endTime - startTime) > 100;
+    const debuggerTime = Date.now() - start;
+    
+    // Method 3: Check console object
+    const consoleCheck = () => {
+        try {
+            console.log('test');
+            return true;
+        } catch(e) {
+            return false;
+        }
+    };
+    
+    // Jika terdeteksi devtools
+    if ((widthDiff > 100 || heightDiff > 100 || debuggerTime > 100) && !protectionActive) {
+        detectionCount++;
+        
+        if (detectionCount > 2) { // Setelah 3 deteksi berturut-turut
+            activateExtremeProtection();
+            protectionActive = true;
+        }
+    } else {
+        detectionCount = Math.max(0, detectionCount - 1);
+    }
 }
 
-// Method 3: Console object tampering
-function detectDevToolsByConsole() {
-    const element = new Image();
-    Object.defineProperty(element, 'id', {
-        get: function() {
-            showProtectionAlert();
-            // Force debugger
-            (function(){})['constructor']('debugger')();
-        }
+// Run detection every 500ms
+setInterval(checkDevTools, 500);
+
+// 6. EXTREME PROTECTION ACTIVATION
+function activateExtremeProtection() {
+    // 1. Freeze semua event listeners
+    const freezeEvents = ['click', 'mousedown', 'mouseup', 'keydown', 'keyup', 'contextmenu'];
+    freezeEvents.forEach(event => {
+        document.addEventListener(event, function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            // Tambahkan efek visual
+            if (event === 'click' || event === 'mousedown') {
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: fixed;
+                    top: ${e.clientY - 10}px;
+                    left: ${e.clientX - 10}px;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: rgba(255, 0, 0, 0.3);
+                    pointer-events: none;
+                    z-index: 99999;
+                    animation: ripple 0.6s linear;
+                `;
+                document.body.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            }
+            
+            return false;
+        }, true);
     });
-    console.log('%c', element);
-}
-
-// Method 4: Performance monitoring
-function detectDevToolsByPerformance() {
-    const perf = performance.now();
-    console.log({perf});
-    if (performance.now() - perf > 100) {
-        showProtectionAlert();
-    }
-}
-
-// 6. CONTINUOUS MONITORING
-setInterval(function() {
-    if (detectDevToolsByDimensions() && !devToolsOpen) {
-        devToolsOpen = true;
-        showProtectionAlert();
-        takeProtectiveAction();
-    }
-}, 500);
-
-// 7. PROTECTIVE ACTION FUNCTION
-function takeProtectiveAction() {
-    // Clear all content
-    document.body.innerHTML = '';
     
-    // Create protective overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'security-overlay';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #000;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: Arial, sans-serif;
-        z-index: 999999;
-        text-align: center;
-        padding: 20px;
-    `;
-    
-    overlay.innerHTML = `
-        <div style="max-width: 600px;">
-            <div style="font-size: 48px; color: #ff0000; margin-bottom: 20px;">
-                ⚠️
-            </div>
-            <h1 style="color: #ff3333; margin-bottom: 20px;">SECURITY VIOLATION DETECTED</h1>
-            <p style="color: #ccc; margin-bottom: 30px; line-height: 1.6;">
-                Developer tools access is strictly prohibited on this platform.<br>
-                This action has been logged for security purposes.
-            </p>
-            <div style="background: #222; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="color: #ff9900; margin: 0;">
-                    <i class="fas fa-shield-alt"></i> Security System Active
-                </p>
-            </div>
-            <p style="color: #999; font-size: 14px;">
-                Please close developer tools to continue using this website.
-            </p>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    
-    // Disable all keyboard input
-    document.addEventListener('keydown', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
-    
-    // Disable all mouse actions
-    document.addEventListener('mousedown', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
-    
-    // Redirect after 5 seconds
-    setTimeout(() => {
-        window.location.href = "about:blank";
-    }, 5000);
-}
-
-// 8. ALERT FUNCTION
-function showProtectionAlert() {
-    // Prevent multiple alerts
-    if (document.getElementById('protection-alert')) return;
-    
-    const alertDiv = document.createElement('div');
-    alertDiv.id = 'protection-alert';
-    alertDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #FF0033, #CC0000);
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        z-index: 99999;
-        font-family: 'Poppins', sans-serif;
-        font-weight: bold;
-        box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
-        border-left: 5px solid #FFCC00;
-        animation: shake 0.5s;
-    `;
-    
-    alertDiv.innerHTML = `
-        <i class="fas fa-ban" style="margin-right: 10px;"></i>
-        Developer Tools Access Blocked!
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Remove alert after 3 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.parentNode.removeChild(alertDiv);
+    // 2. Tambahkan CSS untuk freeze
+    const freezeStyle = document.createElement('style');
+    freezeStyle.textContent = `
+        * {
+            cursor: not-allowed !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            pointer-events: none !important;
         }
-    }, 3000);
-}
-
-// 9. INITIALIZE PROTECTION
-(function() {
-    // Run all detection methods on load
+        
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.01);
+            z-index: 99998;
+            pointer-events: none;
+        }
+    `;
+    document.head.appendChild(freezeStyle);
+    
+    // 3. Clear semua konten secara bertahap
     setTimeout(() => {
-        try {
-            detectDevToolsByConsole();
-        } catch(e) {}
-        
-        try {
-            detectDevToolsByPerformance();
-        } catch(e) {}
-        
-        if (detectDevToolsByDimensions()) {
-            takeProtectiveAction();
+        const elements = document.body.children;
+        for (let i = 0; i < elements.length; i++) {
+            if (i % 2 === 0) { // Hapus elemen secara bergantian
+                elements[i].style.opacity = '0.3';
+                elements[i].style.filter = 'blur(2px)';
+            }
         }
     }, 1000);
     
-    // Override console methods
-    const consoleMethods = ['log', 'warn', 'error', 'info', 'debug', 'table', 'dir', 'time', 'timeEnd', 'trace'];
-    consoleMethods.forEach(method => {
-        const original = console[method];
-        console[method] = function(...args) {
-            showProtectionAlert();
-            // Optionally, you can still log but with protection
-            // original.apply(console, args);
-        };
-    });
-    
-    // Block eval and Function constructor
-    window.eval = function() {
-        showProtectionAlert();
-        return null;
-    };
-    
-    window.Function = function() {
-        showProtectionAlert();
-        return function() {};
-    };
-})();
-
-// 10. BLOCK IFRAME INSPECTION
-if (window.top !== window.self) {
-    // Block if framed
-    window.top.location = window.self.location;
+    // 4. Redirect setelah beberapa waktu
+    setTimeout(() => {
+        window.location.href = window.location.href; // Reload halaman
+    }, 3000);
 }
 
-// 11. ANIMATION FOR ALERT
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% {transform: translateX(0);}
-        10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
-        20%, 40%, 60%, 80% {transform: translateX(5px);}
+// 7. PREVENT ELEMENT INSPECTION VIA INSPECTOR
+Object.defineProperty(document, 'hidden', {
+    get: function() {
+        activateExtremeProtection();
+        return false;
     }
-    
-    .no-select {
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-    }
-    
-    .no-pointer {
-        pointer-events: none !important;
-    }
-`;
-document.head.appendChild(style);
-
-// Add no-select class to body
-document.body.classList.add('no-select');
-
-// ============================================
-// ORIGINAL WEBSITE FUNCTIONALITY
-// ============================================
-
-// Countdown Timer untuk Piala Dunia 2026
-function updateCountdown() {
-    const worldCupDate = new Date('June 8, 2026 00:00:00').getTime();
-    const now = new Date().getTime();
-    const timeLeft = worldCupDate - now;
-    
-    // Perhitungan waktu
-    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-    
-    // Tampilkan hasil dengan leading zeros
-    document.getElementById('days').textContent = days.toString().padStart(3, '0');
-    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-    
-    // Efek animasi saat detik berubah
-    const secondsElement = document.getElementById('seconds');
-    secondsElement.classList.add('pulse');
-    setTimeout(() => secondsElement.classList.remove('pulse'), 500);
-    
-    // Jika hitungan mundur selesai
-    if (timeLeft < 0) {
-        clearInterval(countdownInterval);
-        document.querySelector('.countdown-grid').innerHTML = 
-            '<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">' +
-            '<div style="color: #00CC66; font-size: 2rem; font-weight: 800; margin-bottom: 10px;">' +
-            '<i class="fas fa-trophy"></i></div>' +
-            '<div style="color: white; font-size: 1.5rem; font-weight: 700;">Piala Dunia 2026 Telah Dimulai!</div>' +
-            '<div style="color: rgba(255,255,255,0.8); font-size: 1rem; margin-top: 10px;">Mari saksikan pertandingan!</div>' +
-            '</div>';
-        
-        document.querySelector('.countdown-button').innerHTML = 
-            '<i class="fas fa-play-circle"></i> Tonton Live Pertandingan';
-        document.querySelector('.countdown-button').href = 'https://fifa.com/worldcup/live';
-    }
-}
-
-// Update countdown setiap detik
-const countdownInterval = setInterval(updateCountdown, 1000);
-updateCountdown(); // Jalankan sekali di awal
-
-// News category filter
-document.querySelectorAll('.news-category').forEach(category => {
-    category.addEventListener('click', function() {
-        // Remove active class from all categories
-        document.querySelectorAll('.news-category').forEach(cat => {
-            cat.style.background = 'rgba(0, 204, 102, 0.1)';
-            cat.style.color = '#00AA55';
-            cat.style.borderColor = 'transparent';
-        });
-        
-        // Add active class to clicked category
-        this.style.background = '#00AA55';
-        this.style.color = 'white';
-        this.style.borderColor = '#00AA55';
-    });
 });
 
-// Smooth scroll untuk anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        if(targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if(targetElement) {
-            window.scrollTo({
-                top: targetElement.offsetTop - 80,
+Object.defineProperty(document, 'visibilityState', {
+    get: function() {
+        activateExtremeProtection();
+        return 'visible';
+    }
+});
+
+// 8. BLOCK ALL DRAG OPERATIONS
+document.addEventListener('dragstart', function(e) {
+    e.preventDefault();
+    e.dataTransfer.setData('text/plain', '');
+    e.dataTransfer.effectAllowed = 'none';
+    return false;
+}, true);
+
+// 9. INTERFERE WITH ELEMENT SELECTION
+document.addEventListener('selectstart', function(e) {
+    e.preventDefault();
+    
+    // Buat seleksi tidak stabil
+    const selection = window.getSelection();
+    if (selection) {
+        selection.removeAllRanges();
+    }
+    
+    // Tambahkan efek visual
+    e.target.classList.add('no-select-flash');
+    setTimeout(() => {
+        e.target.classList.remove('no-select-flash');
+    }, 300);
+    
+    return false;
+}, true);
+
+// 10. ADD INTERFERENCE STYLES
+const interferenceStyle = document.createElement('style');
+interferenceStyle.textContent = `
+    .no-select-flash {
+        animation: flash 0.3s;
+    }
+    
+    @keyframes flash {
+        0%, 100% { background-color: transparent; }
+        50% { background-color: rgba(255, 0, 0, 0.1); }
+    }
+    
+    *:hover {
+        transition: none !important;
+    }
+    
+    ::selection {
+        background: transparent !important;
+    }
+    
+    ::-moz-selection {
+        background: transparent !important;
+    }
+`;
+document.head.appendChild(interferenceStyle);
+
+// 11. RANDOM PAGE INTERFERENCE (jika devtools terdeteksi)
+setInterval(() => {
+    if (protectionActive) {
+        // Random scroll
+        if (Math.random() > 0.7) {
+            window.scrollBy({
+                top: (Math.random() > 0.5 ? 1 : -1) * 50,
                 behavior: 'smooth'
             });
         }
-    });
-});
-
-// Responsive images handling
-function handleImageLoad() {
-    this.style.opacity = '1';
-}
-
-document.querySelectorAll('img').forEach(img => {
-    img.addEventListener('load', handleImageLoad);
-    if(img.complete) handleImageLoad.call(img);
-});
-
-// Touch-friendly interactions
-if ('ontouchstart' in window) {
-    document.querySelectorAll('.card-button, .featured-item, .read-more, .view-all-button, .countdown-button').forEach(button => {
-        button.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.98)';
-        }, { passive: true });
         
-        button.addEventListener('touchend', function() {
-            this.style.transform = '';
-        }, { passive: true });
+        // Random element shake
+        if (Math.random() > 0.8) {
+            const elements = document.querySelectorAll('div, p, h1, h2, h3, a');
+            if (elements.length > 0) {
+                const randomEl = elements[Math.floor(Math.random() * elements.length)];
+                randomEl.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+                setTimeout(() => {
+                    randomEl.style.transform = '';
+                }, 200);
+            }
+        }
+    }
+}, 1000);
+
+// ============================================
+// ORIGINAL FUNCTIONALITY (akan freeze jika proteksi aktif)
+// ============================================
+
+// Function untuk update countdown (hanya bekerja jika proteksi tidak aktif)
+if (!protectionActive) {
+    // Countdown Timer untuk Piala Dunia 2026
+    function updateCountdown() {
+        const worldCupDate = new Date('June 8, 2026 00:00:00').getTime();
+        const now = new Date().getTime();
+        const timeLeft = worldCupDate - now;
+        
+        // Perhitungan waktu
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        
+        // Tampilkan hasil dengan leading zeros
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        
+        if (daysEl) daysEl.textContent = days.toString().padStart(3, '0');
+        if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+        if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+        if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+        
+        // Jika hitungan mundur selesai
+        if (timeLeft < 0) {
+            clearInterval(countdownInterval);
+            const grid = document.querySelector('.countdown-grid');
+            if (grid) {
+                grid.innerHTML = 
+                    '<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">' +
+                    '<div style="color: #00CC66; font-size: 2rem; font-weight: 800; margin-bottom: 10px;">' +
+                    '<i class="fas fa-trophy"></i></div>' +
+                    '<div style="color: white; font-size: 1.5rem; font-weight: 700;">Piala Dunia 2026 Telah Dimulai!</div>' +
+                    '<div style="color: rgba(255,255,255,0.8); font-size: 1rem; margin-top: 10px;">Mari saksikan pertandingan!</div>' +
+                    '</div>';
+            }
+            
+            const button = document.querySelector('.countdown-button');
+            if (button) {
+                button.innerHTML = '<i class="fas fa-play-circle"></i> Tonton Live Pertandingan';
+                button.href = 'https://fifa.com/worldcup/live';
+            }
+        }
+    }
+    
+    // Update countdown setiap detik
+    let countdownInterval;
+    if (!protectionActive) {
+        countdownInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+    }
+    
+    // News category filter
+    document.querySelectorAll('.news-category').forEach(category => {
+        category.addEventListener('click', function() {
+            if (protectionActive) return;
+            
+            document.querySelectorAll('.news-category').forEach(cat => {
+                cat.style.background = 'rgba(0, 204, 102, 0.1)';
+                cat.style.color = '#00AA55';
+                cat.style.borderColor = 'transparent';
+            });
+            
+            this.style.background = '#00AA55';
+            this.style.color = 'white';
+            this.style.borderColor = '#00AA55';
+        });
     });
-}
-
-// Performance optimization - lazy load untuk elements
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '50px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-            observer.unobserve(entry.target);
+    
+    // Touch-friendly interactions
+    if ('ontouchstart' in window && !protectionActive) {
+        document.querySelectorAll('.card-button, .featured-item, .read-more, .view-all-button, .countdown-button').forEach(button => {
+            button.addEventListener('touchstart', function() {
+                if (!protectionActive) {
+                    this.style.transform = 'scale(0.98)';
+                }
+            }, { passive: true });
+            
+            button.addEventListener('touchend', function() {
+                if (!protectionActive) {
+                    this.style.transform = '';
+                }
+            }, { passive: true });
+        });
+    }
+    
+    // Performance optimization
+    if (!protectionActive) {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '50px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !protectionActive) {
+                    entry.target.classList.add('fade-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.social-card, .news-card, .countdown-container, .featured-social, .country-item, .wordpress-news').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Stagger animation
+        document.querySelectorAll('.social-card').forEach((card, index) => {
+            if (!protectionActive) {
+                card.style.transitionDelay = `${index * 0.05}s`;
+            }
+        });
+    }
+    
+    // Fix untuk iOS viewport height
+    function setVh() {
+        if (!protectionActive) {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+    }
+    
+    if (!protectionActive) {
+        setVh();
+        window.addEventListener('resize', setVh);
+        window.addEventListener('orientationchange', setVh);
+    }
+    
+    // Cleanup
+    window.addEventListener('beforeunload', function() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
         }
     });
-}, observerOptions);
-
-// Observe elements untuk lazy animation
-document.querySelectorAll('.social-card, .news-card, .countdown-container, .featured-social, .country-item, .wordpress-news').forEach(el => {
-    observer.observe(el);
-});
-
-// Stagger animation untuk social cards
-document.querySelectorAll('.social-card').forEach((card, index) => {
-    card.style.transitionDelay = `${index * 0.05}s`;
-});
-
-// Fix untuk iOS viewport height
-function setVh() {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    
+    // Animasi tambahan untuk countdown
+    if (!protectionActive) {
+        const countdownItems = document.querySelectorAll('.countdown-item');
+        countdownItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+    }
 }
 
-setVh();
-window.addEventListener('resize', setVh);
-window.addEventListener('orientationchange', setVh);
-
-// Cleanup untuk memory
-window.addEventListener('beforeunload', function() {
-    if(countdownInterval) clearInterval(countdownInterval);
-});
-
-// Animasi tambahan untuk countdown
-const countdownItems = document.querySelectorAll('.countdown-item');
-countdownItems.forEach((item, index) => {
-    item.style.animationDelay = `${index * 0.1}s`;
-});
-
-// Final protection - block any attempt to remove event listeners
-const originalAddEventListener = EventTarget.prototype.addEventListener;
-EventTarget.prototype.addEventListener = function(type, listener, options) {
-    // Block any attempts to remove our protection listeners
-    if (type === 'contextmenu' || type === 'keydown') {
-        return; // Don't allow overriding our listeners
+// 12. FINAL PROTECTION - PREVENT SCRIPT REMOVAL
+(function() {
+    // Buat script ini tidak bisa dihapus
+    const currentScript = document.currentScript;
+    if (currentScript && currentScript.parentNode) {
+        currentScript.parentNode.removeChild = function() {
+            return false;
+        };
     }
-    return originalAddEventListener.call(this, type, listener, options);
-};
+})();
 </script>
 </body>
 </html>
