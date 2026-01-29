@@ -395,7 +395,7 @@
             background: linear-gradient(90deg, #FFCC00, #FF9900);
         }
 
-        /* Main Content Layout - MODIFIED FOR MOBILE FIRST */
+        /* Main Content Layout */
         .main-content {
             display: grid;
             grid-template-columns: 1fr;
@@ -405,21 +405,10 @@
             max-width: 1400px;
         }
 
-        /* URUTAN ELEMEN UNTUK MOBILE */
-        .mobile-order-first {
-            order: -1; /* Ini akan membuat countdown muncul pertama di mobile */
-        }
-
         @media (min-width: 992px) {
-            /* Desktop layout */
             .main-content {
                 grid-template-columns: 1fr 380px;
                 gap: clamp(20px, 3vw, 35px);
-            }
-            
-            /* Reset order untuk desktop */
-            .mobile-order-first {
-                order: 0;
             }
         }
 
@@ -760,7 +749,7 @@
             }
         }
 
-        /* COUNTDOWN YANG DIPERBAIKI */
+        /* COUNTDOWN YANG DIPERBAIKI - SATU BUTTON LEBIH LEBAR */
         .countdown-container {
             background: linear-gradient(135deg, #0A1931, #1a2b4a);
             border-radius: clamp(12px, 2vw, 20px);
@@ -812,7 +801,7 @@
             border-radius: 2px;
         }
 
-        /* Countdown Grid */
+        /* Countdown Grid yang lebih kompak */
         .countdown-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -820,12 +809,6 @@
             margin-bottom: clamp(25px, 3vw, 35px);
             position: relative;
             z-index: 1;
-        }
-
-        @media (max-width: 767px) {
-            .countdown-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         .countdown-item {
@@ -917,7 +900,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Countdown Button */
+        /* Countdown Button - SATU BUTTON LEBAR */
         .countdown-button-container {
             position: relative;
             z-index: 1;
@@ -1453,6 +1436,71 @@
             .author-name {
                 max-width: 200px;
             }
+            
+            .countdown-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ============================================
+           MOBILE REORDERING - COUNTDOWN DI ATAS BERITA
+           ============================================ */
+        
+        /* Untuk mobile: countdown di atas, berita di bawah */
+        @media (max-width: 991px) {
+            .main-content {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Pindahkan sidebar (berisi countdown) ke atas berita */
+            .sidebar {
+                order: -1; /* Ini akan memindahkan countdown ke atas berita */
+                margin-bottom: 30px;
+            }
+            
+            .wordpress-news {
+                order: 1; /* Berita akan berada di bawah */
+            }
+            
+            /* Featured Social tetap di bawah berita */
+            .featured-social {
+                order: 2;
+            }
+        }
+
+        /* Untuk desktop: tetap layout asli */
+        @media (min-width: 992px) {
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 380px;
+                gap: clamp(20px, 3vw, 35px);
+            }
+            
+            .sidebar {
+                grid-column: 2;
+                position: sticky;
+                top: 20px;
+                align-self: start;
+                order: unset;
+                margin-bottom: 0;
+            }
+            
+            .wordpress-news {
+                order: unset;
+                grid-column: 1;
+            }
+            
+            .featured-social {
+                order: unset;
+            }
+        }
+
+        /* Untuk desktop besar */
+        @media (min-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 400px;
+            }
         }
 
         /* Animation classes */
@@ -1463,6 +1511,17 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Styling untuk mobile countdown (opsional) */
+        @media (max-width: 991px) {
+            .countdown-container {
+                margin-top: 0;
+            }
+            
+            .featured-social {
+                margin-top: 20px;
+            }
         }
     </style>
 </head>
@@ -1521,89 +1580,9 @@
             </div>
         </header>
 
-        <!-- Main Content - REORDERED FOR MOBILE -->
+        <!-- Main Content -->
         <div class="main-content">
-            <!-- Sidebar yang sekarang akan muncul pertama di mobile -->
-            <div class="sidebar mobile-order-first">
-                <!-- Countdown -->
-                <div class="countdown-container fade-in">
-                    <h2 class="countdown-title">Menuju Kick-off Piala Dunia 2026</h2>
-                    
-                    <div class="countdown-date">
-                        <div class="countdown-date-text">
-                            <i class="far fa-calendar-alt"></i> Kick-off: 8 Juni 2026
-                        </div>
-                    </div>
-                    
-                    <div class="countdown-grid">
-                        <div class="countdown-item">
-                            <div class="countdown-number" id="days">000</div>
-                            <div class="countdown-label">Hari</div>
-                        </div>
-                        <div class="countdown-item">
-                            <div class="countdown-number" id="hours">00</div>
-                            <div class="countdown-label">Jam</div>
-                        </div>
-                        <div class="countdown-item">
-                            <div class="countdown-number" id="minutes">00</div>
-                            <div class="countdown-label">Menit</div>
-                        </div>
-                        <div class="countdown-item">
-                            <div class="countdown-number" id="seconds">00</div>
-                            <div class="countdown-label">Detik</div>
-                        </div>
-                    </div>
-                    
-                    <div class="countdown-button-container">
-                        <a href="https://livescoreq.com/" target="_blank" class="countdown-button">
-                            <i class="fas fa-calendar-alt"></i> Lihat Jadwal Pertandingan
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Featured Social -->
-                <div class="featured-social fade-in">
-                    <h3 class="featured-title">Featured Social</h3>
-                    <a href="https://www.facebook.com/newsduniasepakbola/" target="_blank" class="featured-item facebook">
-                        <div class="featured-icon">
-                            <i class="fab fa-facebook-f"></i>
-                        </div>
-                        <div class="featured-info">
-                            <h4>Live Discussion</h4>
-                            <p>Join millions of fans</p>
-                        </div>
-                    </a>
-                    <a href="https://www.instagram.com/duniasepakbola.2/" target="_blank" class="featured-item instagram">
-                        <div class="featured-icon">
-                            <i class="fab fa-instagram"></i>
-                        </div>
-                        <div class="featured-info">
-                            <h4>Exclusive Content</h4>
-                            <p>Behind the scenes</p>
-                        </div>
-                    </a>
-                    <a href="https://www.tiktok.com/@duniasepakbola.2" target="_blank" class="featured-item tiktok">
-                        <div class="featured-icon">
-                            <i class="fab fa-tiktok"></i>
-                        </div>
-                        <div class="featured-info">
-                            <h4>Viral Challenges</h4>
-                            <p>Join the fun</p>
-                        </div>
-                    </a>
-                    <a href="https://t.me/DuniaSepakBola2" target="_blank" class="featured-item telegram">
-                        <div class="featured-icon">
-                            <i class="fab fa-telegram"></i>
-                        </div>
-                        <div class="featured-info">
-                            <h4>Instant Updates</h4>
-                            <p>Real-time notifications</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- WordPress News Section - sekarang muncul setelah countdown di mobile -->
+            <!-- WordPress News Section -->
             <section class="wordpress-news fade-in">
                 <div class="news-header">
                     <h2 class="news-title">Berita Sepak Bola Terkini</h2>
@@ -1701,6 +1680,86 @@
                     </a>
                 </div>
             </section>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Countdown yang sudah diperbaiki - SATU BUTTON -->
+                <div class="countdown-container fade-in">
+                    <h2 class="countdown-title">Menuju Kick-off Piala Dunia 2026</h2>
+                    
+                    <div class="countdown-date">
+                        <div class="countdown-date-text">
+                            <i class="far fa-calendar-alt"></i> Kick-off: 8 Juni 2026
+                        </div>
+                    </div>
+                    
+                    <div class="countdown-grid">
+                        <div class="countdown-item">
+                            <div class="countdown-number" id="days">000</div>
+                            <div class="countdown-label">Hari</div>
+                        </div>
+                        <div class="countdown-item">
+                            <div class="countdown-number" id="hours">00</div>
+                            <div class="countdown-label">Jam</div>
+                        </div>
+                        <div class="countdown-item">
+                            <div class="countdown-number" id="minutes">00</div>
+                            <div class="countdown-label">Menit</div>
+                        </div>
+                        <div class="countdown-item">
+                            <div class="countdown-number" id="seconds">00</div>
+                            <div class="countdown-label">Detik</div>
+                        </div>
+                    </div>
+                    
+                    <div class="countdown-button-container">
+                        <a href="https://livescoreq.com/" target="_blank" class="countdown-button">
+                            <i class="fas fa-calendar-alt"></i> Lihat Jadwal Pertandingan
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Featured Social -->
+                <div class="featured-social fade-in">
+                    <h3 class="featured-title">Featured Social</h3>
+                    <a href="https://www.facebook.com/newsduniasepakbola/" target="_blank" class="featured-item facebook">
+                        <div class="featured-icon">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Live Discussion</h4>
+                            <p>Join millions of fans</p>
+                        </div>
+                    </a>
+                    <a href="https://www.instagram.com/duniasepakbola.2/" target="_blank" class="featured-item instagram">
+                        <div class="featured-icon">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Exclusive Content</h4>
+                            <p>Behind the scenes</p>
+                        </div>
+                    </a>
+                    <a href="https://www.tiktok.com/@duniasepakbola.2" target="_blank" class="featured-item tiktok">
+                        <div class="featured-icon">
+                            <i class="fab fa-tiktok"></i>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Viral Challenges</h4>
+                            <p>Join the fun</p>
+                        </div>
+                    </a>
+                    <a href="https://t.me/DuniaSepakBola2" target="_blank" class="featured-item telegram">
+                        <div class="featured-icon">
+                            <i class="fab fa-telegram"></i>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Instant Updates</h4>
+                            <p>Real-time notifications</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Social Media Cards -->
@@ -1979,9 +2038,146 @@
         </div>
     </footer>
 
-    <!-- JavaScript tetap sama seperti sebelumnya -->
     <script>
-        // ... (kode JavaScript yang sama seperti sebelumnya)
+        // ============================================
+        // SILENT PROTECTION - NO VISIBLE ALERTS
+        // ============================================
+
+        // 1. SILENT BLOCK ALL KEYBOARD SHORTCUTS
+        document.addEventListener('keydown', function(e) {
+            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, etc.
+            const blockedCombos = [
+                e.keyCode === 123, // F12
+                e.ctrlKey && e.shiftKey && e.keyCode === 73, // Ctrl+Shift+I
+                e.ctrlKey && e.shiftKey && e.keyCode === 74, // Ctrl+Shift+J
+                e.ctrlKey && e.shiftKey && e.keyCode === 67, // Ctrl+Shift+C
+                e.ctrlKey && e.keyCode === 85, // Ctrl+U
+                e.ctrlKey && e.keyCode === 83, // Ctrl+S
+                e.ctrlKey && e.keyCode === 80, // Ctrl+P
+            ];
+            
+            if (blockedCombos.some(combo => combo)) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+
+        // 2. SILENT BLOCK RIGHT CLICK
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+
+        // 3. SILENT BLOCK SELECTION AND COPY
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        }, true);
+
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        }, true);
+
+        // 4. ADVANCED DEVTools DETECTION - SILENT
+        let devToolsOpened = false;
+        const threshold = 160;
+
+        setInterval(function() {
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            
+            if ((widthThreshold || heightThreshold) && !devToolsOpened) {
+                devToolsOpened = true;
+                // No alert, just silently block
+                silentlyBlockPage();
+            }
+        }, 1000);
+
+        // 5. SILENT BLOCK FUNCTION
+        function silentlyBlockPage() {
+            // Disable all keyboard input
+            document.addEventListener('keydown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }, true);
+            
+            // Disable all mouse actions
+            document.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }, true);
+            
+            // Make all elements non-interactive
+            document.querySelectorAll('*').forEach(el => {
+                el.style.pointerEvents = 'none';
+            });
+            
+            // Clear console silently
+            if (console && console.clear) {
+                console.clear();
+            }
+        }
+
+        // 6. OVERRIDE CONSOLE METHODS SILENTLY
+        (function() {
+            const consoleMethods = ['log', 'warn', 'error', 'info', 'debug', 'table', 'dir'];
+            consoleMethods.forEach(method => {
+                if (console[method]) {
+                    console[method] = function() {
+                        // Do nothing - silent block
+                    };
+                }
+            });
+            
+            // Block eval silently
+            const originalEval = window.eval;
+            window.eval = function() {
+                return null; // Silent block
+            };
+            
+            // Block Function constructor silently
+            window.Function = function() {
+                return function() {}; // Return empty function
+            };
+        })();
+
+        // 7. PREVENT ELEMENT INSPECTION
+        document.addEventListener('mousedown', function(e) {
+            if (e.detail > 1) { // Double click
+                e.preventDefault();
+            }
+        }, false);
+
+        // 8. ADD CSS PROTECTION
+        const protectionStyle = document.createElement('style');
+        protectionStyle.textContent = `
+            * {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                -moz-user-select: none !important;
+                -ms-user-select: none !important;
+            }
+            
+            img, a, button, input {
+                -webkit-touch-callout: none !important;
+            }
+            
+            body {
+                -webkit-user-drag: none !important;
+            }
+        `;
+        document.head.appendChild(protectionStyle);
+
+        // ============================================
+        // ORIGINAL WEBSITE FUNCTIONALITY
+        // ============================================
+
         // Countdown Timer untuk Piala Dunia 2026
         function updateCountdown() {
             const worldCupDate = new Date('June 8, 2026 00:00:00').getTime();
@@ -2025,6 +2221,121 @@
         // Update countdown setiap detik
         const countdownInterval = setInterval(updateCountdown, 1000);
         updateCountdown(); // Jalankan sekali di awal
+
+        // News category filter
+        document.querySelectorAll('.news-category').forEach(category => {
+            category.addEventListener('click', function() {
+                // Remove active class from all categories
+                document.querySelectorAll('.news-category').forEach(cat => {
+                    cat.style.background = 'rgba(0, 204, 102, 0.1)';
+                    cat.style.color = '#00AA55';
+                    cat.style.borderColor = 'transparent';
+                });
+                
+                // Add active class to clicked category
+                this.style.background = '#00AA55';
+                this.style.color = 'white';
+                this.style.borderColor = '#00AA55';
+            });
+        });
+
+        // Smooth scroll untuk anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Responsive images handling
+        function handleImageLoad() {
+            this.style.opacity = '1';
+        }
+
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('load', handleImageLoad);
+            if(img.complete) handleImageLoad.call(img);
+        });
+
+        // Touch-friendly interactions
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('.card-button, .featured-item, .read-more, .view-all-button, .countdown-button').forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                }, { passive: true });
+                
+                button.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                }, { passive: true });
+            });
+        }
+
+        // Performance optimization - lazy load untuk elements
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '50px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements untuk lazy animation
+        document.querySelectorAll('.social-card, .news-card, .countdown-container, .featured-social, .country-item, .wordpress-news').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Stagger animation untuk social cards
+        document.querySelectorAll('.social-card').forEach((card, index) => {
+            card.style.transitionDelay = `${index * 0.05}s`;
+        });
+
+        // Fix untuk iOS viewport height
+        function setVh() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        setVh();
+        window.addEventListener('resize', setVh);
+        window.addEventListener('orientationchange', setVh);
+
+        // Cleanup untuk memory
+        window.addEventListener('beforeunload', function() {
+            if(countdownInterval) clearInterval(countdownInterval);
+        });
+
+        // Animasi tambahan untuk countdown
+        const countdownItems = document.querySelectorAll('.countdown-item');
+        countdownItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Final silent protection - prevent event listener removal
+        (function() {
+            const originalRemove = EventTarget.prototype.removeEventListener;
+            EventTarget.prototype.removeEventListener = function(type, listener, options) {
+                // Prevent removal of our protection listeners
+                if (type === 'contextmenu' || type === 'keydown') {
+                    return;
+                }
+                return originalRemove.call(this, type, listener, options);
+            };
+        })();
     </script>
 </body>
 </html>
