@@ -1,6 +1,40 @@
 // ============================================
-// PIALA DUNIA 2026 - MAIN JAVASCRIPT
+// PIALA DUNIA 2026 - EMERGENCY MODE (TANPA API)
 // ============================================
+
+// DATA BERITA DIKELOLA LANGSUNG DI SINI
+// Edit array ini untuk menambah/mengubah berita
+const newsData = [
+    {
+        id: 1,
+        title: "Selamat Datang di Portal Berita Piala Dunia 2026",
+        date: "20 April 2026",
+        catName: "Piala Dunia",
+        excerpt: "Website berjalan dalam mode darurat. Berita akan segera terhubung otomatis dengan WordPress.",
+        image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=500&h=300&fit=crop",
+        link: "https://newspialadunia.page.gd"
+    },
+    {
+        id: 2,
+        title: "Cara Update Berita Sekarang",
+        date: "20 April 2026",
+        catName: "Panduan",
+        excerpt: "Edit file script.js, cari variabel 'newsData', tambah atau edit isinya. Upload ke GitHub, berita akan langsung berubah.",
+        image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=500&h=300&fit=crop",
+        link: "#"
+    },
+    {
+        id: 3,
+        title: "Informasi: Sinkronisasi WordPress",
+        date: "20 April 2026",
+        catName: "Informasi",
+        excerpt: "RSS Feed WordPress sedang dalam perbaikan. Setelah normal, website akan terhubung otomatis.",
+        image: "https://images.unsplash.com/photo-1598880940080-ff9a29891b85?w=500&h=300&fit=crop",
+        link: "#"
+    }
+];
+
+let visibleCount = 6;
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -16,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
             overlay.classList.toggle('active', show);
             document.body.style.overflow = show ? 'hidden' : '';
         };
-        
         mobileBtn.addEventListener('click', () => toggleMenu(true));
         if (closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
         overlay.addEventListener('click', () => toggleMenu(false));
@@ -70,82 +103,88 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // ========== NEWS DATA ==========
-    const newsData = [
-        { id: 1, title: "Stadion Megah Piala Dunia 2026 Mulai Rampung", date: "15 Maret 2024", category: "piala-dunia", catName: "Piala Dunia", excerpt: "Progres pembangunan 16 stadion di tiga negara tuan rumah mencapai 85%. Stadion ikonik seperti MetLife Stadium dan SoFi Stadium hampir selesai direnovasi.", image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=500&h=300&fit=crop" },
-        { id: 2, title: "Bursa Transfer: Target Utama Klub-klub Eropa", date: "12 Maret 2024", category: "transfer", catName: "Transfer", excerpt: "Bintang muda mulai menjadi incaran klub-klub top Eropa. Nilai transfer diprediksi tembus rekor baru menjelang musim panas 2024.", image: "https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?w=500&h=300&fit=crop" },
-        { id: 3, title: "Perempat Final Liga Champions: Analisis Taktik", date: "10 Maret 2024", category: "ucl", catName: "Liga Champions", excerpt: "Delapan tim siap bertarung di babak perempat final. Para pelatih mulai meracik strategi spesial untuk menghadapi lawan masing-masing.", image: "https://images.unsplash.com/photo-1598880940080-ff9a29891b85?w=500&h=300&fit=crop" },
-        { id: 4, title: "Jadwal Piala Dunia 2026 Resmi Dirilis FIFA", date: "8 Maret 2024", category: "piala-dunia", catName: "Piala Dunia", excerpt: "FIFA resmi mengumumkan jadwal lengkap pertandingan Piala Dunia 2026 yang akan digelar di 16 kota di Amerika Serikat, Kanada, dan Meksiko.", image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=500&h=300&fit=crop" },
-        { id: 5, title: "Manchester United Incar Striker Muda Brasil", date: "5 Maret 2024", category: "transfer", catName: "Transfer", excerpt: "Setan Merah siapkan dana besar untuk mendatangkan striker muda berbakat asal Brasil yang menjadi incaran banyak klub Eropa.", image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=500&h=300&fit=crop" },
-        { id: 6, title: "Real Madrid Lolos ke Semifinal UCL", date: "3 Maret 2024", category: "ucl", catName: "Liga Champions", excerpt: "Real Madrid berhasil melaju ke babak semifinal setelah kemenangan dramatis 3-1 atas rival sekota Atletico Madrid di leg kedua.", image: "https://images.unsplash.com/photo-1598880940080-ff9a29891b85?w=500&h=300&fit=crop" }
-    ];
-    
-    // ========== RENDER NEWS ==========
-    const newsGrid = document.getElementById('newsGrid');
-    if (newsGrid) {
-        let currentFilter = "all";
-        let visibleCount = 6;
+    // ========== RENDER BERITA (LANGSUNG, TANPA API) ==========
+    function renderNewsGrid() {
+        const newsGrid = document.getElementById('newsGrid');
+        if (!newsGrid) return;
         
-        function getFilteredNews() {
-            if (currentFilter === "all") return newsData;
-            return newsData.filter(n => n.category === currentFilter);
-        }
+        const displayed = newsData.slice(0, visibleCount);
         
-        function updateNewsStats() {
-            const total = getFilteredNews().length;
-            const statsSpan = document.getElementById('totalNews');
-            if (statsSpan) statsSpan.innerText = total;
-        }
-        
-        function renderNews() {
-            const filtered = getFilteredNews();
-            const displayed = filtered.slice(0, visibleCount);
-            
+        if (displayed.length === 0) {
+            newsGrid.innerHTML = '<div class="no-news"><i class="fas fa-newspaper"></i> Belum ada berita.</div>';
+        } else {
             newsGrid.innerHTML = displayed.map(news => `
                 <div class="news-card">
-                    <img src="${news.image}" alt="${news.title}" loading="lazy">
+                    <img src="${news.image}" alt="${news.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=500&h=300&fit=crop'">
                     <div class="news-content">
                         <span class="news-tag">${news.catName}</span>
                         <div class="news-date"><i class="far fa-calendar-alt"></i> ${news.date}</div>
                         <h3>${news.title}</h3>
                         <p>${news.excerpt.substring(0, 100)}...</p>
-                        <a href="#" class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
+                        <a href="${news.link}" target="_blank" class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             `).join('');
-            
-            updateNewsStats();
-            
-            const loadBtn = document.getElementById('loadMoreBtn');
-            if (loadBtn) {
-                if (visibleCount >= filtered.length) loadBtn.style.display = "none";
-                else loadBtn.style.display = "inline-flex";
-            }
         }
+        
+        const totalSpan = document.getElementById('totalNews');
+        if (totalSpan) totalSpan.innerText = newsData.length;
         
         const loadBtn = document.getElementById('loadMoreBtn');
         if (loadBtn) {
+            loadBtn.style.display = visibleCount >= newsData.length ? 'none' : 'inline-flex';
+        }
+    }
+    
+    function renderNewsPreview() {
+        const newsPreview = document.getElementById('newsPreview');
+        if (!newsPreview) return;
+        
+        const previewNews = newsData.slice(0, 3);
+        
+        if (previewNews.length === 0) {
+            newsPreview.innerHTML = '<div class="no-news">Belum ada berita.</div>';
+        } else {
+            newsPreview.innerHTML = previewNews.map(news => `
+                <div class="news-card">
+                    <img src="${news.image}" alt="${news.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=500&h=300&fit=crop'">
+                    <div class="news-content">
+                        <span class="news-tag">${news.catName}</span>
+                        <div class="news-date"><i class="far fa-calendar-alt"></i> ${news.date}</div>
+                        <h3>${news.title}</h3>
+                        <p>${news.excerpt.substring(0, 80)}...</p>
+                        <a href="${news.link}" target="_blank" class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function setupLoadMore() {
+        const loadBtn = document.getElementById('loadMoreBtn');
+        if (loadBtn) {
             loadBtn.addEventListener('click', () => {
-                visibleCount += 3;
-                renderNews();
+                visibleCount += 6;
+                renderNewsGrid();
             });
         }
-        
+    }
+    
+    // ========== FILTER (MASIH BISA DIPAKAI) ==========
+    function setupFilters() {
         const filters = document.querySelectorAll('.filter');
+        if (filters.length === 0) return;
+        
         filters.forEach(f => {
             f.addEventListener('click', function() {
                 filters.forEach(ff => ff.classList.remove('active'));
                 this.classList.add('active');
-                currentFilter = this.getAttribute('data-filter');
-                visibleCount = 6;
-                renderNews();
+                // Untuk sekarang, semua berita ditampilkan
+                renderNewsGrid();
             });
         });
-        
-        renderNews();
     }
     
-    // ========== SOCIAL DATA ==========
     // ========== SOCIAL DATA ==========
     const socialData = [
         { name: "Komunitas Facebook", desc: "Live streaming, diskusi eksklusif, polling prediksi skor.", icon: "fb", link: "https://www.facebook.com/InfoBolaHarian2", btn: "Join Group" },
@@ -186,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('scroll', () => {
             backToTop.classList.toggle('show', window.pageYOffset > 300);
         });
-        
         backToTop.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
@@ -205,5 +243,11 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', (e) => e.preventDefault());
     });
     
-    console.log('Piala Dunia 2026 Official Hub - Fully Loaded!');
+    // ========== MULAI RENDER ==========
+    renderNewsGrid();
+    renderNewsPreview();
+    setupLoadMore();
+    setupFilters();
+    
+    console.log('✅ EMERGENCY MODE: Website berjalan dengan data statis, tidak ada request ke API eksternal');
 });
